@@ -1,0 +1,52 @@
+- name: load_balancers_playbook
+  hosts: load_balancers
+  remote_user: ansible
+  tasks:
+  - name: haproxy installed
+    apt:
+      name: haproxy
+      state: present
+      update_cache: yes
+    become: true
+  - name: systemd override dir created
+    file:
+      dest: /etc/systemd/system/haproxy.service.d
+      state: directory
+    become: true
+  - name: systemd override copied
+    copy:
+      src: haproxy-systemd-override.conf
+      dest: /etc/systemd/system/haproxy.service.d/override.conf
+    become: true
+    register: systemd_override
+  - name: haproxy config dir created
+    file:
+      dest: /etc/haproxy/sites-enabled
+      state: directory
+    become: true
+  - name: haproxy config copied
+    copy:
+      src: haproxy-champions.cfg
+      dest: /etc/haproxy/sites-enabled/haproxy-champions.cfg
+    become: true
+    register: haproxy_config
+  - name: systemd modules reloaded
+    systemd:
+      daemon_reload: yes
+    become: true
+    when: systemd_override.changed
+    changed_when: true
+  - name: haproxy systemd module restarted
+    systemd:
+      name: haproxy
+      state: restarted
+      enabled: yes
+    become: true
+    when: (haproxy_config.changed) or (systemd_override.changed)   
+  - name: 8000 port opened
+    firewalld:
+      port: 8000/tcp
+      state: enabled
+      permanent: yes
+      immediate: yes
+    become: true    
