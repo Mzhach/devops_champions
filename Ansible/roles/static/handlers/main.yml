@@ -1,0 +1,6 @@
+  - name: nginx systemd module restarted
+    systemd:
+      name: nginx
+      state: restarted
+      enabled: yes
+    become: true

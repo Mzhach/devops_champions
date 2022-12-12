@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 # Vagrant
 .vagrant/
+
+# Tar files
+Ansible/roles/api/files/api.tar

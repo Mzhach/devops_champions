@@ -1,0 +1,6 @@
+- name: static_playbook
+  hosts: static
+  remote_user: ansible
+  become: true
+  roles:
+  - static

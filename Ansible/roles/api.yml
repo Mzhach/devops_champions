@@ -1,0 +1,6 @@
+- name: api_playbook
+  hosts: static
+  remote_user: ansible
+  become: true
+  roles:
+  - api

@@ -1,0 +1,37 @@
+  - name: haproxy installed
+    apt:
+      name: haproxy
+      state: present
+      update_cache: yes
+    become: true
+  - name: systemd override dir created
+    file:
+      dest: /etc/systemd/system/haproxy.service.d
+      state: directory
+    become: true
+  - name: systemd override copied
+    copy:
+      src: haproxy-systemd-override.conf
+      dest: /etc/systemd/system/haproxy.service.d/override.conf
+    become: true
+    notify: 
+    - "systemd modules reloaded"
+    - "haproxy systemd module restarted"
+  - name: haproxy config dir created
+    file:
+      dest: /etc/haproxy/sites-enabled
+      state: directory
+    become: true
+  - name: haproxy config copied
+    copy:
+      src: haproxy-champions.cfg
+      dest: /etc/haproxy/sites-enabled/haproxy-champions.cfg
+    become: true
+    notify: "haproxy systemd module restarted"
+  - name: 8000 port opened
+    firewalld:
+      port: 8000/tcp
+      state: enabled
+      permanent: yes
+      immediate: yes
+    become: true

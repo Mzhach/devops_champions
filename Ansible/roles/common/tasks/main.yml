@@ -1,0 +1,61 @@
+  - name: check is python installed
+    raw: "apt list --installed 2>/dev/null | grep python3"
+    failed_when: false
+    changed_when: false
+    register: is_python_present
+  - name: python is installed
+    raw: "apt -y update && apt install -y python2 python3-pip python3-selinux python3-apt"
+    when: is_python_present.rc != 0
+  - name: user ansible is present
+    user:
+      name: ansible
+      state: present
+      uid: 1099
+  - name: nopasswd sudo to user ansible is allowed
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^ansible'
+      line: 'ansible ALL=(ALL) NOPASSWD: ALL'
+      validate: visudo -cf %s
+  - name: authorized key added
+    authorized_key:
+      user: ansible
+      state: present
+      key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+  - name: firewalld installed
+    apt:
+      name: firewalld
+      state: present
+      update_cache: yes
+  - name: firewalld systemd module enabled
+    systemd:
+      name: firewalld
+      state: started
+      enabled: yes
+  - name: 80 port opened
+    firewalld:
+      port: 80/tcp
+      state: enabled
+      permanent: yes
+      immediate: yes
+  - name: user vagrant is present
+    user:
+      name: vagrant
+      state: present
+      uid: 1098
+      password: $y$j9T$XqKnCGVlAea0EH8ECt7Go1$DLKfG43ezPbxAZc3NiYRvZ5ArNzN0F2aQ0qAwp4SVF3
+  - name: nopasswd sudo to user vagrant is allowed
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^vagrant'
+      line: 'vagrant ALL=(ALL) NOPASSWD: ALL'
+      validate: visudo -cf %s
+  - name: root login disabled
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      state: present
+      line: 'DenyUsers root'
+      validate: sshd -tf %s
+    notify: "ssh systemd module restarted"

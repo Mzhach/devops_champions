@@ -1,0 +1,5 @@
+- name: load_balancers_playbook
+  hosts: load_balancers
+  remote_user: ansible
+  roles:
+  - load_balancer

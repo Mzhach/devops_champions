@@ -1,0 +1,51 @@
+  - name: dependencies are installed
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        - lsb-release
+        - gnupg
+        - python3-pip
+      state: latest
+      update_cache: true
+
+  - name: docker GPG apt key is presented
+    apt_key:
+      url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+      state: present
+
+  - name: docker repository is presented
+    apt_repository:
+      repo: "deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+      state: present
+      filename: docker
+
+  - name: docker is installed
+    apt:
+      name: docker
+      state: latest
+      update_cache: true
+
+  - name: docker module for python is installed
+    pip:
+      name: docker
+
+  - name: docker is active
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: weather-api docker image is loaded
+    docker_image:
+      name: weather-api
+      load_path: /roles/api/files/api.tar
+
+  - name: weather-api container is started
+    docker_container:
+      name: api
+      image: weather-api
+      state: started
+      exposed_ports:
+        - "80:80"
+      restart: yes

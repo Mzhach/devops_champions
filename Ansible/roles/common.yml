@@ -1,0 +1,5 @@
+- name: common_playbook
+  hosts: all
+  gather_facts: false
+  roles:
+  - common

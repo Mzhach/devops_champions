@@ -1,0 +1,5 @@
+  - name: ssh systemd module restarted
+    systemd:
+      name: ssh
+      state: restarted
+      enabled: yes
