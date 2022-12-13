@@ -1,3 +1,5 @@
+  - name: vars are included
+    include_vars: ../vars/vars.yml
   - name: check is python installed
     raw: "apt list --installed 2>/dev/null | grep python3"
     failed_when: false
@@ -44,7 +46,7 @@
       name: vagrant
       state: present
       uid: 1098
-      password: $y$j9T$XqKnCGVlAea0EH8ECt7Go1$DLKfG43ezPbxAZc3NiYRvZ5ArNzN0F2aQ0qAwp4SVF3
+      password: "{{ vagrant_user_password }}"
   - name: nopasswd sudo to user vagrant is allowed
     lineinfile:
       dest: /etc/sudoers
